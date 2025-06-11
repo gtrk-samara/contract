@@ -1,0 +1,27 @@
+name: Go CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Получение исходников
+      uses: actions/checkout@v3
+
+    - name: Установка Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.20'
+
+    - name: Проверка сборки
+      run: go build -v ./...
+
+    - name: Запуск тестов
+      run: go test -v ./...
