@@ -1,0 +1,210 @@
+/* Общие стили для контейнера */
+.container-fluid {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header .logo {
+    margin: 10px 0; /* Adjust to smaller values, e.g., 5px or 0 */
+    padding: 0; /* Remove padding if present */
+}
+
+/* Стили для таблицы с договорами */
+.table-striped tbody tr {
+    border-bottom: 1px solid #0f6fcf;
+}
+
+.table-striped tbody tr:last-child {
+    border-bottom: 3px solid #0f6fcf;
+}
+
+.table-striped thead tr {
+    border-top: 3px solid #0f6fcf;
+}
+
+/* Стили для модальных окон */
+.modal-content {
+    border: 3px solid #0d6efd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 0.5rem;
+}
+
+/* Стили для кнопок загрузки и удаления */
+.download-btn, .delete-btn {
+    padding: 0.25rem 0.5rem;
+    min-width: 38px;
+}
+
+.download-btn:disabled, .delete-btn:disabled {
+    opacity: 0.6;
+}
+
+/* Стили для кнопок в input-group */
+.input-group .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Стили для выделения статуса в таблице */
+.table td.status-highlight {
+    font-weight: bold;
+    color: #28a745 !important;
+}
+
+.table td.status-completed {
+    font-weight: bold;
+    color: #5c4033 !important;
+}
+
+.table td.status-signing {
+    font-weight: bold;
+    color: #003087 !important;
+}
+
+/* Стили для ячеек контрагента */
+.table td.supplier-cell {
+    border-right: none;
+    padding-right: 5px;
+}
+
+.table td.counterparty-status-cell::before {
+    content: ": ";
+    color: #666;
+}
+
+.table td.counterparty-status-cell {
+    border-left: none;
+    padding-left: 5px;
+}
+
+/* Стили для кнопки просмотра */
+.view-btn {
+    padding: 0.25rem 0.5rem;
+    min-width: 38px;
+}
+
+.view-btn:disabled {
+    opacity: 0.6;
+}
+
+/* Фиксированная ширина столбцов таблицы */
+.table th:nth-child(1), .table td:nth-child(1) { width: 5%; }
+.table th:nth-child(2), .table td:nth-child(2) { width: 10%; }
+.table th:nth-child(3), .table td:nth-child(3) { width: 10%; }
+.table th:nth-child(4), .table td:nth-child(4) { width: 35%; }
+.table th:nth-child(5), .table td:nth-child(5) { width: 15%; }
+.table th:nth-child(6), .table td:nth-child(6) { width: 10%; }
+.table th:nth-child(7), .table td:nth-child(7) { width: 10%; }
+.table th:nth-child(8), .table td:nth-child(8) { width: 10%; }
+.table th:nth-child(9), .table td:nth-child(9) { width: 5%; }
+
+/* Стили для модального окна формата A4 */
+.modal-a4 {
+    max-width: 1191px;
+    width: 100%;
+    margin: 0 auto;
+    resize: horizontal;
+    overflow: auto;
+    min-width: 794px;
+}
+
+.modal-a4 .modal-content {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-a4 .modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+/* Стили для содержимого модального окна A4 */
+.a4-content {
+    width: 100%;
+    min-height: 100%;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Стили для информации о кураторе */
+.curator-info {
+    font-size: 0.8em;
+    font-style: italic;
+    color: #555;
+    display: block;
+}
+
+/* Стили для кнопки выбора файла */
+input[type="file"].form-control::file-selector-button {
+    padding: .375rem .75rem;
+    margin: -.375rem -.75rem;
+    margin-inline-end: .75rem;
+    background-color: #e9ecef;
+    border: 0;
+    color: transparent !important;
+    text-indent: -9999px;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23212529' class='bi bi-paperclip' viewBox='0 0 16 16'%3e%3cpath d='M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0V3z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 1rem 1rem;
+}
+
+input[type="file"] {
+    position: relative;
+    width: 100%;
+}
+
+/* Стили для текста "Файл загружен" */
+input[type="file"].has-file::after {
+    content: "Файл загружен";
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: #28a745;
+    pointer-events: none;
+    font-size: 14px;
+}
+
+input[type="file"].has-file::-webkit-file-upload-button,
+input[type="file"].has-file::file-selector-button {
+    visibility: hidden;
+}
+
+input[type="file"].has-file {
+    color: transparent;
+}
+
+/* Отступ для кнопок рядом с полем загрузки файла */
+input[type="file"].has-file + .btn {
+    margin-left: 5px;
+}
+
+/* Стили для надписи "ЭДО" */
+.edo-label {
+    background-color: #28a745;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    margin-left: 8px;
+}
+
+/* Стили для таблицы пользователей */
+#usersTable .btn-sm {
+    padding: 0.25rem 0.5rem;
+    margin: 0 2px;
+}
+
+/* Фиксированная ширина столбцов таблицы пользователей */
+#usersTable th:nth-child(1), #usersTable td:nth-child(1) { width: 5%; }
+#usersTable th:nth-child(2), #usersTable td:nth-child(2) { width: 20%; }
+#usersTable th:nth-child(3), #usersTable td:nth-child(3) { width: 20%; }
+#usersTable th:nth-child(4), #usersTable td:nth-child(4) { width: 40%; }
+#usersTable th:nth-child(5), #usersTable td:nth-child(5) { width: 15%; }

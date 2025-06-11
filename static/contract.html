@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление договорами</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <!-- Контейнер для основного контента (скрыт до входа) -->
+        <div class="container-fluid mt-5" id="mainContent" style="display: none;">
+            <img src="static/logo.jpg" alt="Logo" style="display: block; margin: 10px 0; padding: 0; transform: scale(0.5); transform-origin: left;">
+            <h1 class="mb-3">Управление договорами</h1>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContractModal">
+                Добавить договор
+            </button>
+            <select id="statusFilter">
+                <option value="all">Все</option>
+                <option value="active">Активные</option>
+                <option value="completed">Завершённые</option>
+            </select>
+            <button type="button" class="btn btn-secondary" id="settingsButton" data-bs-toggle="modal" data-bs-target="#settingsModal" style="display: none;">
+                <i class="bi bi-gear"></i> 
+            </button>
+            <button type="button" class="btn btn-secondary" id="showUsersModal" data-bs-toggle="modal" data-bs-target="#usersModal" style="display: none;">
+                <i class="bi bi-people"></i> 
+            </button>
+            <button type="button" class="btn btn-secondary" id="addUserButton" data-bs-toggle="modal" data-bs-target="#addUserModal" style="display: none;">
+                <i class="bi bi-person-plus"></i> 
+            </button>
+            <button type="button" class="btn btn-danger" id="logoutButton" style="display: none;">
+                Выйти
+            </button>
+            <span id="userInfo" style="margin-left: auto;"></span>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ДАТА</th>
+                    <th>НОМЕР</th>
+                    <th>ПРЕДМЕТ</th>
+                    <th colspan="2">КОНТРАГЕНТ</th>
+                    <th>ЮРИСТ</th>
+                    <th>ГЛАВБУХ</th>
+                    <th>СТАТУС</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="contractsTable"></tbody>
+        </table>
+    </div>
+
+    <!-- Модальное окно для входа -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Вход в систему</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="loginInput" class="form-label">Логин</label>
+                            <input type="text" class="form-control" id="loginInput" required>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label for="passwordInput" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="passwordInput" required>
+                            <span class="position-absolute end-0 top-50 translate-middle-y me-3"
+                                style="cursor: pointer;" onclick="togglePassword('passwordInput')">
+                                <i class="bi bi-eye" id="passwordInputToggleIcon"></i>
+                            </span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Войти</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления договора -->
+    <div class="modal fade" id="addContractModal" tabindex="-1" aria-labelledby="addContractModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addContractModalLabel">Добавить договор</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addContractForm">
+                        <div class="mb-3">
+                            <label for="addName" class="form-label">Название</label>
+                            <input type="text" class="form-control" id="addName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addNumber" class="form-label">Номер</label>
+                            <input type="text" class="form-control" id="addNumber">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addSupplier" class="form-label">Поставщик</label>
+                            <input type="text" class="form-control" id="addSupplier" list="counterpartiesList" required>
+                            <datalist id="counterpartiesList"></datalist>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addCurator" class="form-label">Куратор</label>
+                            <input type="text" class="form-control" id="addCurator" list="curatorsList" required>
+                            <datalist id="curatorsList"></datalist>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addDate" class="form-label">Дата заключения</label>
+                            <input type="date" class="form-control" id="addDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addFile" class="form-label">Файл договора</label>
+                            <input type="file" class="form-control" id="addFile">
+                            <small class="form-text text-muted" id="addFilePath">Нет загруженного файла</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования договора -->
+    <div class="modal fade" id="editContractModal" tabindex="-1" aria-labelledby="editContractModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editContractModalLabel">Редактирование договора</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editContractForm">
+                        <input type="hidden" id="editContractId">
+                        <div class="mb-4 border-bottom pb-3">
+                            <h6>Основные данные</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label for="editDate" class="form-label">Дата заключения</label>
+                                            <input type="date" class="form-control" id="editDate">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label for="editNumber" class="form-label">Номер</label>
+                                            <input type="text" class="form-control" id="editNumber">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editName" class="form-label">Название</label>
+                                        <input type="text" class="form-control" id="editName">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="editSupplier" class="form-label">Контрагент</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="editSupplier"
+                                                list="counterpartiesList">
+                                            <button class="btn btn-info" type="button"
+                                                id="showCounterpartyDetailsButton">
+                                                <i class="bi bi-info-circle"></i>
+                                            </button>
+                                        </div>
+                                        <datalist id="counterpartiesList"></datalist>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editCurator" class="form-label">Куратор</label>
+                                        <select class="form-select" id="editCurator" required>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editStatus" class="form-label">Статус договора</label>
+                                        <select class="form-select" id="editStatus">
+                                            <option value="Получение шаблона">Получение шаблона</option>
+                                            <option value="Проверка инициатором">Проверка инициатором</option>
+                                            <option value="Согласование внутри компании">Согласование внутри компании
+                                            </option>
+                                            <option value="Согласование с контрагентом">Согласование с контрагентом
+                                            </option>
+                                            <option value="Подписание">Подписание</option>
+                                            <option value="Исполнение">Исполнение</option>
+                                            <option value="Завершение">Завершение</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h6>Согласование и файлы</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editCounterpartyStatus" class="form-label">Контрагент</label>
+                                        <select class="form-select" id="editCounterpartyStatus"
+                                            title="Инициатор фиксирует действия контрагента">
+                                            <option value="Ожидает шаблон">Ожидает шаблон</option>
+                                            <option value="Шаблон предоставлен">Шаблон предоставлен</option>
+                                            <option value="Проверяет">Проверяет</option>
+                                            <option value="Согласовал">Согласовал</option>
+                                            <option value="Внес правки">Внес правки</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editLawyerStatus" class="form-label">Юрист</label>
+                                        <select class="form-select" id="editLawyerStatus">
+                                            <option value="Ожидает проверки">Ожидает проверки</option>
+                                            <option value="Проверяет">Проверяет</option>
+                                            <option value="Согласовал">Согласовал</option>
+                                            <option value="Внес правки">Внес правки</option>
+                                            <option value="Протокол разногласий">Протокол разногласий</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editChiefAccountantStatus" class="form-label">Главбух</label>
+                                        <select class="form-select" id="editChiefAccountantStatus">
+                                            <option value="Ожидает проверки">Ожидает проверки</option>
+                                            <option value="Проверяет">Проверяет</option>
+                                            <option value="Согласовал">Согласовал</option>
+                                            <option value="Внес правки">Внес правки</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editFile" class="form-label">Файл договора</label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="editFile">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm view-btn"
+                                                data-file="file_path" disabled>
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm download-btn"
+                                                data-file="file_path" disabled>
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                data-file="file_path" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <small class="form-text text-muted" id="editFilePath">Нет загруженного
+                                            файла</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editLawyerEditedFile" class="form-label">Файл договора с правками
+                                            юриста</label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="editLawyerEditedFile">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm view-btn"
+                                                data-file="lawyer_edited_file_path" disabled>
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm download-btn"
+                                                data-file="lawyer_edited_file_path" disabled>
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                data-file="lawyer_edited_file_path" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <small class="form-text text-muted" id="editLawyerEditedFilePath">Нет
+                                            загруженного файла</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editChiefAccountantEditedFile" class="form-label">Файл договора с
+                                            правками главбуха</label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="editChiefAccountantEditedFile">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm view-btn"
+                                                data-file="chief_accountant_edited_file_path" disabled>
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm download-btn"
+                                                data-file="chief_accountant_edited_file_path" disabled>
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                data-file="chief_accountant_edited_file_path" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <small class="form-text text-muted" id="editChiefAccountantEditedFilePath">Нет
+                                            загруженного файла</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editAddAgreement" class="form-label">Доп. соглашение</label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="editAddAgreement">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm view-btn"
+                                                data-file="add_agreement_path" disabled>
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm download-btn"
+                                                data-file="add_agreement_path" disabled>
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                data-file="add_agreement_path" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <small class="form-text text-muted" id="editAddAgreementPath">Нет загруженного
+                                            файла</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editDisagreementProtocol" class="form-label">Протокол
+                                            разногласий</label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="editDisagreementProtocol">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm view-btn"
+                                                data-file="disagreement_protocol_path" disabled>
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm download-btn"
+                                                data-file="disagreement_protocol_path" disabled>
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                data-file="disagreement_protocol_path" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <small class="form-text text-muted" id="editDisagreementProtocolPath">Нет
+                                            загруженного файла</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="editSignedFile" class="form-label">Скан подписанного
+                                            договора</label>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="editSignedFile">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm view-btn"
+                                                data-file="signed_file_path" disabled>
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm download-btn"
+                                                data-file="signed_file_path" disabled>
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                data-file="signed_file_path" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <small class="form-text text-muted" id="editSignedFilePath">Нет загруженного
+                                            файла</small>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="editIsSignedElectronically">
+                                        <label class="form-check-label" for="editIsSignedElectronically">Подписано по
+                                            ЭДО</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">История действий</label>
+                                        <textarea class="form-control" id="editHistory" rows="3" readonly></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="editMovement" class="form-label">Движение по договору</label>
+                                        <textarea class="form-control" id="editMovement" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="deleteFileModal" tabindex="-1"
+                                aria-labelledby="deleteFileModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteFileModalLabel">Удаление файла</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Вы уверены, что хотите удалить файл "<span id="deleteFileName"></span>" из
+                                            договора с ID <span id="deleteFileContractId"></span>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Отмена</button>
+                                            <button type="button" class="btn btn-danger"
+                                                id="confirmDeleteFile">Удалить</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="viewFileModal" tabindex="-1"
+                                aria-labelledby="viewFileModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-a4">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="viewFileModalLabel">Просмотр файла</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p-4">
+                                            <div id="fileContent" class="a4-content"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Закрыть</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger me-2" id="deleteContractButton">Удалить договор</button>
+                    <button type="button" class="btn btn-warning me-auto" id="clearHistoryButton">Очистить
+                        историю</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-success" form="editContractForm">Сохранить</button>
+                </div>
+                <div class="modal fade" id="clearHistoryModal" tabindex="-1" aria-labelledby="clearHistoryModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="clearHistoryModalLabel">Очистка истории</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Вы уверены, что хотите очистить историю действий для договора с ID <span
+                                    id="clearHistoryContractId"></span>?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="button" class="btn btn-warning" id="confirmClearHistory">Очистить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для подтверждения удаления договора -->
+    <div class="modal fade" id="deleteContractModal" tabindex="-1" aria-labelledby="deleteContractModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteContractModalLabel">Удаление договора</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить договор с ID <span id="deleteContractId"></span>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для отображения данных контрагента -->
+    <div class="modal fade" id="counterpartyDetailsModal" tabindex="-1" aria-labelledby="counterpartyDetailsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="counterpartyDetailsModalLabel">Данные контрагента</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="counterpartyDetailsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="counterpartyName" class="form-label">Название</label>
+                                    <input type="text" class="form-control" id="counterpartyName">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyINN" class="form-label">ИНН</label>
+                                    <input type="text" class="form-control" id="counterpartyINN">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyKPP" class="form-label">КПП</label>
+                                    <input type="text" class="form-control" id="counterpartyKPP">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyOGRN" class="form-label">ОГРН</label>
+                                    <input type="text" class="form-control" id="counterpartyOGRN">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyBIK" class="form-label">БИК</label>
+                                    <input type="text" class="form-control" id="counterpartyBIK">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyBankName" class="form-label">Название банка</label>
+                                    <input type="text" class="form-control" id="counterpartyBankName">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyAccountNumber" class="form-label">Расчетный счет</label>
+                                    <input type="text" class="form-control" id="counterpartyAccountNumber">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="counterpartyDirectorName" class="form-label">ФИО руководителя</label>
+                                    <input type="text" class="form-control" id="counterpartyDirectorName">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyDirectorPhone" class="form-label">Телефон
+                                        руководителя</label>
+                                    <input type="text" class="form-control" id="counterpartyDirectorPhone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyManagerName" class="form-label">ФИО менеджера</label>
+                                    <input type="text" class="form-control" id="counterpartyManagerName">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyManagerPhone" class="form-label">Телефон менеджера</label>
+                                    <input type="text" class="form-control" id="counterpartyManagerPhone">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyLegalAddress" class="form-label">Юридический адрес</label>
+                                    <input type="text" class="form-control" id="counterpartyLegalAddress">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyPhysicalAddress" class="form-label">Физический адрес</label>
+                                    <input type="text" class="form-control" id="counterpartyPhysicalAddress">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="counterpartyComment" class="form-label">Комментарий</label>
+                                    <textarea class="form-control" id="counterpartyComment" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-success" form="counterpartyDetailsForm"
+                        id="saveCounterpartyBtn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для настроек -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Настройки</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="settingsForm">
+                        <div class="mb-3">
+                            <label for="backendUrlInput" class="form-label">Адрес бэкэнда</label>
+                            <input type="text" class="form-control" id="backendUrlInput"
+                                placeholder="Например, http://192.168.1.100:8080">
+                            <small class="form-text text-muted">Текущий адрес: см. поле ввода</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="folderPathInput" class="form-label">Путь к папке для хранения файлов</label>
+                            <input type="text" class="form-control" id="folderPathInput"
+                                placeholder="Например, D:\MyFolder">
+                            <small class="form-text text-muted" id="selectedFolderPath">Текущая папка: (по умолчанию
+                                D:\contract\uploads)</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления пользователя -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Добавить пользователя</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="mb-3">
+                            <label for="userLogin" class="form-label">Логин</label>
+                            <input type="text" class="form-control" id="userLogin" required>
+                            <small class="form-text text-muted">Логин должен быть уникальным.</small>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label for="userPassword" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="userPassword" required>
+                            <span class="position-absolute end-0 top-50 translate-middle-y me-3"
+                                style="cursor: pointer;" onclick="togglePassword('userPassword')">
+                                <i class="bi bi-eye" id="userPasswordToggleIcon"></i>
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userRole" class="form-label">Роль</label>
+                            <select class="form-select" id="userRole" required>
+                                <option value="curator">Куратор</option>
+                                <option value="lawyer">Юрист</option>
+                                <option value="chief_accountant">Главный бухгалтер</option>
+                                <option value="chief_engineer">Главный инженер</option>
+                                <option value="admin">Администратор</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userSurname" class="form-label">Фамилия</label>
+                            <input type="text" class="form-control" id="userSurname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userName" class="form-label">Имя</label>
+                            <input type="text" class="form-control" id="userName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userPatronymic" class="form-label">Отчество</label>
+                            <input type="text" class="form-control" id="userPatronymic" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для кураторов -->
+    <div class="modal fade" id="curatorsModal" tabindex="-1" aria-labelledby="curatorsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="curatorsModalLabel">Управление кураторами</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <h6>Список кураторов</h6>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Фамилия</th>
+                                <th>Имя</th>
+                                <th>Отчество</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="curatorsTable"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для уведомлений -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel">Уведомление</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно управления пользователями -->
+    <div class="modal fade" id="usersModal" tabindex="-1" aria-labelledby="usersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="usersModalLabel">Управление пользователями</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Логин</th>
+                                <th>Роль</th>
+                                <th>ФИО</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования пользователя -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Редактирование пользователя</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editUserLogin" class="form-label">Логин</label>
+                            <input type="text" class="form-control" id="editUserLogin" required>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label for="editUserPassword" class="form-label">Новый пароль</label>
+                            <input type="password" class="form-control" id="editUserPassword">
+                            <span class="position-absolute end-0 top-50 translate-middle-y me-3"
+                                style="cursor: pointer;" onclick="togglePassword('editUserPassword')">
+                                <i class="bi bi-eye" id="editUserPasswordToggleIcon"></i>
+                            </span>
+                            <small class="form-text text-muted">Оставьте пустым, если не хотите менять пароль</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserRole" class="form-label">Роль</label>
+                            <select class="form-select" id="editUserRole" required>
+                                <option value="curator">Куратор</option>
+                                <option value="lawyer">Юрист</option>
+                                <option value="chief_accountant">Главный бухгалтер</option>
+                                <option value="chief_engineer">Главный инженер</option>
+                                <option value="admin">Администратор</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserSurname" class="form-label">Фамилия</label>
+                            <input type="text" class="form-control" id="editUserSurname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Имя</label>
+                            <input type="text" class="form-control" id="editUserName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserPatronymic" class="form-label">Отчество</label>
+                            <input type="text" class="form-control" id="editUserPatronymic" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <script src="/static/scripts.js"></script>
+</body>
+
+</html>
