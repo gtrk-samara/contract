@@ -213,7 +213,7 @@ function sortContractsByStatus(contracts) {
         "Согласование с контрагентом": 3,
         "Подписание": 4,
         "Исполнение": 5,
-        "Завершение": 6
+        "Завершен": 6
     };
     return contracts.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 }
@@ -267,10 +267,10 @@ async function loadContracts(filter = "all") {
         contractsTable.innerHTML = "";
         const sortedContracts = sortContractsByStatus(contracts);
         sortedContracts.forEach(contract => {
-            if (filter === "active" && contract.status === "Завершение") return;
-            if (filter === "completed" && contract.status !== "Завершение") return;
+            if (filter === "active" && contract.status === "Завершен") return;
+            if (filter === "completed" && contract.status !== "Завершен") return;
             const row = document.createElement("tr");
-            const statusClass = contract.status === "Завершение" ? "status-completed" : "";
+            const statusClass = contract.status === "Завершен" ? "status-completed" : "";
             const lawyerStatusClass = contract.lawyer_status === "Согласовал" ? "status-highlight" : "";
             const chiefAccountantStatusClass = contract.chief_accountant_status === "Согласовал" ? "status-highlight" : "";
             const counterpartyStatusClass = contract.counterparty_status === "Согласовал" ? "status-highlight" : "";
@@ -855,7 +855,7 @@ document.getElementById("editContractForm").onsubmit = async (e) => {
             errorMessage = "Подписание возможно только после согласования всеми сторонами.";
         }
     }
-    if (status === "Исполнение" || status === "Завершение") {
+    if (status === "Исполнение" || status === "Завершен") {
         if (lawyerStatus !== "Согласовал" || chiefAccountantStatus !== "Согласовал" || counterpartyStatus !== "Согласовал") {
             isValid = false;
             errorMessage = "Исполнение или завершение возможно только после согласования всеми сторонами.";
@@ -865,7 +865,7 @@ document.getElementById("editContractForm").onsubmit = async (e) => {
         alert(errorMessage);
         return;
     }
-    if (status === "Завершение") {
+    if (status === "Завершен") {
         if (!isSignedElectronically && !currentContract.signed_file_path && !signedFile) {
             alert("Для завершения договора необходимо либо прикрепить скан подписанного документа, либо отметить подписание по ЭДО");
             return;
